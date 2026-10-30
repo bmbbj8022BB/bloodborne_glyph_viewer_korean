@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>블러드본 혈정석 세팅 뷰어</title>
+<style>
+:root{--bg:#fafafa;--fg:#1d1d1f;--mut:#6b6b72;--card:#fff;--bd:#dcdce0;--ac:#a31f34;--hl:#fde8ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15151a;--fg:#e8e8ec;--mut:#9a9aa5;--card:#1e1e25;--bd:#33333d;--ac:#e0566c;--hl:#3a1f25;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15151a;--fg:#e8e8ec;--mut:#9a9aa5;--card:#1e1e25;--bd:#33333d;--ac:#e0566c;--hl:#3a1f25;color-scheme:dark}
+html,body{margin:0}body{background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,"Malgun Gothic",sans-serif;padding:0 14px 40px}
+h1{font-size:20px;margin:16px 0 4px}.sub{color:var(--mut);font-size:12px;margin:0 0 12px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;display:flex;gap:8px;flex-wrap:wrap;z-index:5}
+.bar input,.bar select{font:inherit;padding:8px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg)}
+.bar input{flex:1 1 220px}
+h2{font-size:16px;margin:22px 0 6px;color:var(--ac)}h3{font-size:13px;margin:12px 0 4px}
+.w{overflow-x:auto;background:var(--card);border:1px solid var(--bd);border-radius:8px}
+table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--bd);vertical-align:top}th{color:var(--mut);font-weight:600}
+tr:last-child td{border-bottom:0}.g{font-family:ui-monospace,Consolas,monospace;cursor:pointer;color:var(--ac);font-weight:700}
+.r{font-weight:700}.n{color:var(--mut);font-size:12px}.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.chips button{font:inherit;font-size:13px;padding:5px 11px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);cursor:pointer}.chips button.on{border-color:var(--ac);color:var(--ac);font-weight:700}details{margin:0 0 8px}.tip{border-bottom:1px dotted var(--ac);cursor:help}#tp{display:none;white-space:pre-line;position:fixed;z-index:20;width:250px;padding:8px 10px;background:var(--fg);color:var(--bg);border-radius:6px;font-size:12px;line-height:1.5}
+.box{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:10px 12px;margin:6px 0}.f{font-family:ui-monospace,Consolas,monospace;font-size:13px;line-height:1.9}.box ul{margin:4px 0;padding-left:18px}.w.s table{min-width:0}td.c{white-space:nowrap}.box b{color:var(--ac)}#wq{font:inherit;padding:6px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);margin:4px 0;width:240px;max-width:100%}
+.bd{font-size:11px;font-weight:600;padding:1px 7px;border:1px solid var(--bd);border-radius:10px;color:var(--mut);margin-left:8px;vertical-align:middle}</style></head><body>
+<h1>블러드본 혈정석 세팅 뷰어</h1>
+<p class="sub">출처: bloodborne-wiki.com "Best Blood Gems Setups" (패치 1.08 기준) · 명칭은 블러드본 사전 기준 · 문양 코드를 누르면 복사돼요 · F/R/C 표기는 생략</p><div class="chips tabs"><button class="on" data-t="1">혈정석 세팅</button><button data-t="2">데미지 계산</button></div><div id="t1"><details class="n"><summary>용어 설명</summary>• 쇠약형(Waning, 결손형): 초승달 모양 소켓<br>• 리게인(Rally): 피격으로 잃은 HP(주황 게이지)를 공격으로 회복하는 시스템<br>• 리게인 혈정석: 그 회복량 증가</details>
+<div class="bar"><input id="q" type="search" placeholder="검색: 토니트루스, 번개, 롬, 토니트루스, 야수, pwmf22gu …  (띄어쓰기=AND)">
+<select id="sh"><option value="">모든 모양</option><option value="R">방사형</option><option value="T">삼각형</option><option value="W">쇠약형</option><option value="C">원형</option></select>
+<select id="mr"><option value="0">등급 전체</option><option value="17">17+</option><option value="18">18+</option><option value="19">19+</option><option value="20">20만</option></select><select id="dm"><option value="">모든 던전</option><option value="n">일반 던전</option><option value="e">편집(Edited) 던전</option></select></div>
+<div class="chips" id="chips"></div><div id="out"></div><p class="n" id="cnt"></p></div><div id="t2" hidden>
+<p class="sub">출처: bloodborne-wiki.com "Damage Calculation" (Sel의 Hunter's Guide to Damage + Kanaris 카운터 연구) · PvE 기준 · 일부는 커뮤니티 실측값</p>
+<h2>① 기본 흐름</h2>
+<div class="box f">총 공격력(AR) × 모션 배율(Dmg x) = 총 피해<br>총 피해 → 적 방어 적용(⑤ 곡선) = 실제 피해<br>※ 피해 타입별로 따로 계산한 뒤 합산</div>
+<h2>② 공격력(AR) 공식</h2>
+<div class="box f">AR = [기본 + (기본 × 보정 × 포화도)] × 혈정석% + 고정 공격력</div>
+<div class="w s"><table><tr><th>항목</th><th>의미</th></tr>
+<tr><td class="c">기본</td><td>무기 기본 공격력 (+10 기준, 아래 ⑩ 표)</td></tr>
+<tr><td class="c">보정</td><td>스탯 보정 계수. 중격/예리/온기/냉기 혈정석은 계수에 가산 (예: +65 → +0.65)</td></tr>
+<tr><td class="c">포화도</td><td>스탯 수치별 비율 0~1 (⑥ 표). 소프트캡 25 / 50</td></tr>
+<tr><td class="c">혈정석 %</td><td>곱연산 (합연산 아님)</td></tr>
+<tr><td class="c">고정 공격력</td><td>마지막에 더함. 모션 배율은 고정분을 뺀 AR에 적용됨</td></tr></table></div>
+<div class="box"><b>고정 vs % 선택</b><ul><li>배율 높은 공격(코스의 기생충 기본기, 말뚝박이 차지 R2) → % 혈정석 유리</li><li>배율 낮은 다단히트(변형 로가리우스 R1, 코스의 기생충 L2) → 고정 공격력 혈정석 유리</li></ul></div>
+<h2>③ 피해 타입</h2>
+<div class="w s"><table><tr><th>구분</th><th>내용</th></tr>
+<tr><td class="c">5대 타입</td><td>물리 · 혈질 · 신비 · 화염 · 번개 (적 방어는 물리/타격/찌르기/혈질/신비/화염/번개 7종)</td></tr>
+<tr><td class="c">물리 하위</td><td>일반 / 타격 / 찌르기. 공격 하나하나마다 타입이 다름</td></tr>
+<tr><td class="c">물리 공격력 상승</td><td>일반 + 타격 + 찌르기 전부 적용</td></tr>
+<tr><td class="c">타격 / 찌르기 상승</td><td>해당 타입 공격에만 적용 (특화 혈정석)</td></tr>
+<tr><td class="c">복합 타입</td><td>한 공격이 물리+신비처럼 섞일 수 있음. 각 부분이 자기 방어로 감소</td></tr>
+<tr><td class="c">혈질 무기</td><td>치카게·출혈검·시몬의 궁검는 변형 시 혈질 피해. 상태창 AR엔 물리만 표시</td></tr></table></div>
+<h2>④ 혈정석 규칙</h2>
+<div class="box"><ul>
+<li><b>곱연산</b>: 27.2% 3개 = 1.272³ = 2.06배 (+106%). 합연산(+82%)이 아니야</li>
+<li><b>모두강화의(Nourishing)</b>: 무기의 모든 공격력 타입에 적용</li>
+<li><b>속성 변환</b>: 순수 물리 무기에 신비/화염/번개 혈정석 → 기본 물리가 0이 되고 속성으로 변환, 신비 스탯 보정을 따름</li>
+<li><b>변환 우선순위</b>: 신비 &gt; 화염 &gt; 번개 (화염+번개 같이 끼면 화염으로 변환, 번개 피해 0)</li>
+<li>변환된 무기는 Fire/Bolt Paper 사용 불가, Beast Blood Pellet도 속성엔 효과 없음</li>
+<li>변환 불가 무기(복합 무기·혈질 무기)는 자기가 가진 속성에만 % 적용, 없는 속성은 고정 공격력만 들어감</li>
+<li>고정 공격력 아이템: 발화 부싯깃(화염 +80), Bolt Paper(번개 +80), Empty Phantasm Shell(신비 +80)</li></ul></div>
+<h2>⑤ 방어 적용 곡선 (A=공격력, D=적 방어)</h2>
+<div class="w s"><table><tr><th>조건</th><th>피해</th></tr>
+<tr><td class="c">D &gt; 8A</td><td class="f">0.1 × A</td></tr>
+<tr><td class="c">A &lt; D &lt; 8A</td><td class="f">(19.2/49 × (A/D − 0.125)² + 0.1) × A</td></tr>
+<tr><td class="c">0.4A &lt; D &lt; A</td><td class="f">(−0.4/3 × (A/D − 2.5)² + 0.7) × A</td></tr>
+<tr><td class="c">0.125A &lt; D &lt; 0.4A</td><td class="f">(−0.8/121 × (A/D − 8)² + 0.9) × A</td></tr>
+<tr><td class="c">D &lt; 0.125A</td><td class="f">0.9 × A</td></tr></table></div>
+<div class="box"><b>예시: 장송의 칼날</b> (근력25 · 기술50 · 신비6, 물리 27.2%×3)<ul>
+<li>물리 AR = [160 + (160×0.3×0.5 + 160×0.75×0.85)] × 1.272³ = 588</li>
+<li>신비 AR = 60 + (60×0.69×0.03) = 61 → 합계 649</li>
+<li>적 물리방어 70 / 신비방어 67, 첫 R1(×1.00): 물리 529 + 신비 21 = <b>550 피해</b></li></ul></div>
+<h2>⑥ 스탯 포화도</h2>
+<div class="w s"><table><tr><th>스탯</th><th>5</th><th>10</th><th>15</th><th>20</th><th>25</th><th>30</th><th>40</th><th>50</th><th>60</th><th>70</th><th>80</th><th>90</th><th>99</th></tr>
+<tr><th>포화도</th><td>0.025</td><td>0.05</td><td>0.2</td><td>0.35</td><td>0.5</td><td>0.57</td><td>0.71</td><td>0.85</td><td>0.881</td><td>0.911</td><td>0.942</td><td>0.972</td><td>1.0</td></tr></table></div>
+<p class="n">사냥꾼 도구는 신비 50 이후에도 성장률이 높아.</p>
+<h2>⑦ 추가 배율</h2>
+<div class="w s"><table><tr><th>상황</th><th>배율</th><th>비고</th></tr>
+<tr><td>카운터 시 (Open Foe)</td><td class="c">×1.2~1.4 (최대 1.7 측정)</td><td>적 공격이 끝난 직후~회복 전에 타격. 타이밍이 어긋나면 감소. 카운터 시 공격력 상승(Finestrike) 혈정석으로 추가 증가</td></tr>
+<tr><td>다운 상태 (패리·백스탭 후)</td><td class="c">약 ×2 (2.14 측정)</td><td>다음 일반 공격에 적용 (내장공격 제외)</td></tr>
+<tr><td>불안정 (구르기·대시·점프 중 피격)</td><td class="c">약 ×1.4</td><td>플레이어가 받는 피해. 방어구에 따라 ×1.48까지</td></tr>
+<tr><td>약점 부위</td><td class="c">추가 피해</td><td>다른 배율과 중첩</td></tr>
+<tr><td>야수 / 권속</td><td class="c">혈정석 효과</td><td>야수사냥꾼·권속사냥꾼 혈정석 (저주 옵션은 감소)</td></tr></table></div>
+<h2>⑧ 톱날 · 성스러운 무기</h2>
+<div class="box"><b>톱날속성(Serrated): +20%</b> — 최종 피해에 적용<ul>
+<li>무기: 톱 단창 일반 / 톱 창 양쪽 / 칼날 지팡이 변형 / 야수절단기 양쪽 / 무한궤도 톱 변형</li>
+<li>대상: 혐오스러운 야수, 야수에 홀린 영혼, 야수 피의 주인, 피에 굶주린 야수, 성직자 야수, 검은 야수 파알, 개스코인 신부(야수), 초대 교구장 로렌스, 로랑의 검은 야수, 로랑의 은빛 야수, 저주받은 루드비히(1페이즈), 재앙의 야수, 교구장 아멜리아, 옛 주군의 감시견</li>
+<li>멧돼지·광견 같은 "동물형" 야수는 혈정석 야수 효과만 받고 톱날은 안 받아</li></ul></div>
+<div class="box"><b>성스러운(Righteous)</b> — 최종 피해에 적용<ul>
+<li>+50%: 교단의 돌망치 일반 / 루드비히의 성검 양쪽 / 월광검 양쪽</li>
+<li>+30%: 로가리우스의 바퀴 양쪽</li>
+<li>+20%: 칼날 지팡이 일반 / 교단의 피크 찌르기</li>
+<li>대상: 피를핥는자, 라비린스의 유령, 폐성의 유령(머리·칼), 고대의 미아</li></ul></div>
+<h2>⑨ 짐승화(Beasthood)</h2>
+<div class="w s"><table><tr><th>포인트</th><th>1-24</th><th>25-49</th><th>50-99</th><th>100-199</th><th>200-299</th><th>300+</th></tr>
+<tr><th>물리 공격 배율</th><td>1.2</td><td>1.3</td><td>1.4</td><td>1.5</td><td>1.6</td><td>1.7</td></tr>
+<tr><th>방어 배율</th><td>0.8</td><td>0.7</td><td>0.6</td><td>0.5</td><td>0.4</td><td>0.2</td></tr></table></div>
+<p class="n">물리 부분에만 적용. 톱날 보너스는 짐승화 상태에선 안 먹어.</p>
+<h2>⑩ 무기 기본값 (+10)</h2>
+<input id="wq" type="search" placeholder="무기 검색 (예: 토니트루스, 치카게)">
+<div class="w s"><table><tr><th>무기</th><th>물리</th><th>혈질</th><th>신비</th><th>근력</th><th>기술</th><th>혈질보정</th><th>신비보정</th></tr><tbody id="wb"></tbody></table></div>
+<p class="n">보정 = 근력 / 기술 / 혈질(Blt) / 신비(Arc). 상태창의 S~E 등급은 계산에 쓰이지 않는 표시용이야.</p>
+</div>
+<script>
+const SH={R:"방사형",R2:"방사형×2",T:"삼각형",W:"쇠약형(결손형)",C:"원형"};
+const LO={"일":"투메르 일","이":"이즈의 비석","로":"깊은 로랑"};
+const B={BL:["야수 피의 주인","Bloodletting Beast"],HB:["머리 없는 야수 피의 주인","Headless Bloodletting Beast"],WB:["무자비한 감시자(보스)","Merciless Watchers"],RM:["우둔한 거미 롬","Rom, the Vacuous Spider"],AM:["아미그달라","Amygdala"],LC:["고대의 미아","Lost Child of Antiquity"],BS:["브레인서커","Brainsucker"],BA:["뼈의 재의 사냥꾼","Bone Ash Hunters"],PE:["투메르의 장로","Pthumerian Elder"],WD:["옛 주군의 감시견","Watchdog of the Old Lords"],AB:["혐오스러운 야수","Abhorrent Beast"],MM:["미궁의 광인","Labyrinth Madman"],BP:["야수에 홀린 영혼","Beast-possessed Soul"],CC:["너무 좁은 관","Cramped Casket"],LS:["로랑의 은빛 야수","Loran Silverbeast"],LL:["로란의 성직자","Loran Cleric"],SP:["라비린스의 유령","Labyrinth Spirits"],EB:["우주의 딸 이브리에타스","Ebrietas, Daughter of the Cosmos"],BB:["피에 굶주린 야수","Blood-starved Beast"],MS:["무자비한 감시자(산탄총)","Merciless Watcher (Scattergun)"],CF:["관 속 전리품","Coffin loot"]};
+const SYN={phys:"물리",counter:"카운터",open:"카운터",charge:"차지",rapid:"맹독",rp:"맹독",slow:"느린 독",sp:"느린 독",physical:"물리",fire:"화염",bolt:"번개",arcane:"신비",arc:"신비",blunt:"타격",thrust:"찌르기",poison:"독",rally:"리게인",radial:"방사형",triangle:"삼각형",waning:"쇠약형",beast:"야수",kin:"권속",tonitrus:"토니트루스",wheel:"바퀴",logarius:"로가리우스",lost:"잃어버린",uncanny:"이질적인",ihyll:"투메르 일",isz:"이즈",loran:"로랑",tempering:"강화",adept:"특화",striking:"차지",pulsing:"치유",bloodtinge:"혈질",kos:"코스",parasite:"기생충",amygdalan:"아미그달라",hammer:"붐 해머",cold:"냉기",heavy:"중격",str:"근력"};
+const S=[
+["물리 (Physical)",[
+["근력 물리 (일반/이질적 무기)",["R|20|근력보정 +65 + 보조옵션(물리+15)|HB|ksgqnycq|일3","R|19|물리 27.2%|WB|pwmf22gu|일1","T|19|물리 27.2%|WB|5pwujscd|이3"]],
+["물리 (일반/이질적 무기)",["R2|19|물리 27.2%|WB|pwmf22gu|일1","T|19|물리 27.2%|WB|5pwujscd|이1"]],
+["특화(Adept) — 타격/찌르기 무기 (야수절단기, 교단의 피크, 교단의 돌망치, 총창, 토니트루스, 로가리우스의 바퀴)",["R2|19|타격/찌르기 32.6%|WB|pwmf22gu|일1","T|19|타격/찌르기 32.6%|WB|5pwujscd|이1"]]]],
+["무기별 세팅 (Weapon-specific)",[
+["잃어버린 토니트루스 / 로가리우스의 바퀴 / 월광검 / 폭발 망치 — 3점 세트 (보조옵션: 토니트루스 번개 · 바퀴 신비 · 월광검 물리 · 폭발 망치 화염)",["R|20|공격력 19.5% + 물리 15|RM|v5v5fpsd|일3","T|20|공격력 21.5% + 보조 15|AM|y592byza|이4","W|20|공격력 21.5% + 보조 15|AM|ske4igwv|로3"]],
+["잃어버린 무기 대안 (쉬운 파밍)",["R|17|공격력 19.3% + 물리 8.1|LC|pwmf22gu|일2·3 (램프 직후)"]],
+["이질적인 로가리우스의 바퀴 (변형 대시 R1 다단히트)",["R2|17|타격 10.9% + 신비 67.5|BS|8y2wes5u|일1","T|19|타격 11.7% + 신비 72.5|BS|huy83p9r|이1"]],
+["아미그달라종의 팔 (아미그달라종의 팔, 일반)",["R|20|근력보정 +65 + 물리 15|HB|ksgqnycq|일3","R|19|물리 27.2%|WB|pwmf22gu|일1","T|19|물리 27.2%|WB|5pwujscd|이1"]],
+["이질적인 코스의 기생충 (코스의 기생충)",["R2|18|신비 23.1% + 신비 14|BA|cb7jig9p|이1","T|20|신비 24.8% + 신비 15|EB|e2ts7vub|이3","T|19|신비 27.2%|WB|5pwujscd|이1"]]]],
+["속성 (Elemental)",[
+["화염 (잃어버린 무기)",["R|20|신비보정 +65 + 보조옵션|PE|kkvk8gsj|일3","T|20|신비보정 +65 + 화염 15|PE|jemmjmpi|이3","W|20|화염 24.8% + 화염 15|WD|758v8txa|로3","W|18|화염 21% + 화염 31.5 (대안)|MM|ete2cbjc|로3"]],
+["번개 (잃어버린 무기)",["R|20|신비보정 +65 + 보조옵션|PE|kkvk8gsj|일3","T|20|신비보정 +65 + 번개 15|PE|jemmjmpi|이3","W|20|번개 22.5% + 번개 33.8|AB|6q77zr9h|로3","W|18|번개 21% + 번개 31.5 (대안)|MM|ete2cbjc|로3"]],
+["신비 (일반/이질적 무기)",["R2|20|신비보정 +65 + 보조옵션|PE|kkvk8gsj|일3","T|19|신비 27.2%|WB|5pwujscd|이1"]]]],
+["카운터 시 (Open Foes)",[
+["카운터 시 (Open Foes)",["R2|18|물리 21% + 카운터 시 공격력 +12.6%|MM|7enpbrta|일2","T|18|물리 23.1% + 카운터 시 +5.6%|BP|5p6rzey7|일2"]],
+]],["리게인 (Rally)",[["리게인 — 물리 (잃어버린 무기)",["R|18|물리 23.1% + 리게인 2.8%|BA|uq3masdd|로1","T|18|물리 23.1% + 리게인 2.8%|BP|uq3masdd|로1","W|18|물리 21% + 리게인 6.3%|MM|phyptxe6|로3"]],
+["리게인 — 번개 (잃어버린 무기)",["R|18|번개 23.1% + 리게인 2.8%|BA|uq3masdd|로1","T|20|신비보정 +65 + 리게인 3%|PE|e2ts7vub|이4","W|20|번개 22.5% + 리게인 6.7%|AB|6q77zr9h|로3"]],
+]],["차지 (Striking)",[["차지(Striking) — 차지 공격",["R2|19|차지 공격력 +36.3%|WB|pwmf22gu|일1","T|18|차지 공격력 +30.8% + 보조옵션|BP|5p6rzey7|일2"]],
+]],["HP 회복 (Pulsing)",[["치유(Pulsing) — HP 지속 회복",["R2|18|HP 지속 회복 +5 + 보조옵션|BA|56428adr|로1","W|19|HP 지속 회복 +5 + 보조옵션|LS|6q77zr9h|로2"]],
+]],["빈사 시 공격력 (Poorman's)",[["빈사 시 공격력 (Poorman's)",["R2|17|물리 상승(빈사) 12.2% + 27%|SP|q6updq6g|일2","T|17|물리 상승(빈사) 12.2% + 27%|SP|pckenae9|이1"]]]],
+["야수/권속 사냥꾼 (Beast/Kin Hunter)",[
+["순수 야수·권속 (일반/이질적 무기)",["R2|18|야수/권속 27.7% + 보조옵션|BA|56428adr|로1","T|19|야수/권속 32.6%|WB|5pwujscd|이1","R|17|야수/권속 26.7% + 보조옵션 (대안)|CC|v3krwpyp|일3","T|17|야수/권속 26.7% + 화염/번개 14 (대안)|CC|fnh9ctui|이3"]],
+["화염 약점 — 야수 (잃어버린 무기)",["R|18|야수 27.7% + 화염 14|BA|56428adr|로1","T|19|야수 32.6%|WB|5pwujscd|이1","W|20|화염 24.8% + 야수 5.2%|WD|758v8txa|로3"]],
+["번개 약점 — 권속 (잃어버린 무기)",["R|18|권속 27.7% + 번개 14|BA|56428adr|로1","T|19|권속 32.6%|WB|5pwujscd|이1","W|20|번개 22.5% + 권속 12.2%|AB|6q77zr9h|로3"]],
+["저신비 야수/권속 (쇠약형 대안)",["W|17|야수용: 화염 9.1% + 화염 67.5|LL|wtxu2x2p|로3","W|18|권속용: 번개 +77|CF|39a5b7tc|로3 (보너스 방 관)"]]]],
+["독 (Poison)",[
+["맹독 (잃어버린 무기)",["R|18|맹독 +18.4 + 보조옵션|BA|56428adr|로1","T|19|맹독 +21.7|WB|5pwujscd|이1","W|19|맹독 +19.1 + 보조옵션|LS|enjids45|로1"]],
+["느린 독 (잃어버린 무기)",["R|18|느린 독 +15.4 + 보조옵션|BA|56428adr|로1","T|19|느린 독 +18.1|WB|5pwujscd|이1","W|19|느린 독 +15.9 + 보조옵션|LS|enjids45|로1"]]]],
+["혈질 총기 (Bloodtinge)",[
+["혈질 혈정석 (총기류 — 원형 소켓)",["C|19|혈질 공격력 28.7% + 혈질 +7.3|BB|jvz8469j|로1","C|18|혈질 공격력 31.5%|MS|y592byza|이1"]]]]
+];
+let cat="";const $=id=>document.getElementById(id),out=$("out");
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function render(){
+ const q=$("q").value.trim().toLowerCase().split(/\s+/).filter(Boolean),sh=$("sh").value,mr=+$("mr").value,dm=$("dm").value;let h="",n=0,ed=0;
+ for(const[st,gs,md]of ALL){if(cat!==""&&cat!==st)continue;if(dm&&md!==dm)continue;let sh_="";
+  for(const[gt,rows]of gs){let tr="";
+   for(const row of rows){const[s,r,e,b,g,l]=row.split("|"),bo=B[b],lo=l[0]in LO?LO[l[0]]+" "+l.slice(1).replace(/^(\d)/,"$1층"):l;
+    let txt=(st+gt+SH[s]+e+bo.join(" ")+g+lo+(md==="e"?" 편집 edited":" 일반 normal")).toLowerCase();for(const[en,ko]of NM)if(txt.includes(ko))txt+=" "+en.toLowerCase();
+    if(sh&&s[0]!==sh)continue;if(+r<mr)continue;
+    if(!q.every(t=>txt.includes(t)||(SYN[t]&&txt.includes(SYN[t]))))continue;
+    n++;if(md==="e")ed=1;tr+=`<tr><td>${SH[s]}</td><td class="r">${r}</td><td>${tipify(esc(e))}</td><td>${esc(bo[0])}<div class="n">${esc(bo[1])}</div></td><td>${g.split("/").map(c=>`<span class="g" data-c="${c.trim()}">${c.trim()}</span>`).join(" ")}</td><td>${esc(lo)}</td></tr>`}
+   if(tr)sh_+=`<h3>${esc(gt)}</h3><div class="w"><table><tr><th>모양</th><th>등급</th><th>효과</th><th>드롭</th><th>문양</th><th>위치</th></tr>${tr}</table></div>`}
+  if(sh_)h+=`<h2>${st}<span class="bd">${md==="n"?"일반 던전":"편집 던전"}</span></h2>`+sh_}
+ out.innerHTML=(ed?'<div class="box n">'+EDN+'</div>':'')+(h||'<p class="n">결과 없음</p>');$("cnt").textContent=n+"개 세팅 표시 중"}
+out.addEventListener("click",e=>{const c=e.target.dataset.c;if(c){try{navigator.clipboard.writeText(c);e.target.textContent="복사됨";setTimeout(render,700)}catch(x){}}});
+const E=[
+["물리 (Physical)",[
+["물리 (일반/이질적 무기, 장송의 칼날, 자비의 칼날)",["R2|19|물리 27.2%|WB|zkkuat7j|일1","T|19|물리 27.2%|WB|zbc6bqes|이1"]],
+["물리 — 강화 심연 대안 (일반/이질적 무기)",["R2|20|물리 24.8% + 물리 15|BL|j37wapj3|일3","T|19|물리 27.2%|WB|zbc6bqes|이1"]],
+["근력 물리 (일반/이질적 무기)",["R|20|근력보정 +65 + 물리 15|HB|zkkuat7j|일3","R|19|물리 27.2%|WB|zkkuat7j|일1","T|19|물리 27.2%|WB|zbc6bqes|이1"]],
+["특화 (타격: 폭발 망치·변형 교단의 돌망치·야수절단기·변형 루드비히의 성검 / 찌르기: 변형 교단의 피크)",["R2|19|타격/찌르기 32.6%|WB|zkkuat7j|일1","T|19|타격/찌르기 32.6%|WB|zbc6bqes|이1"]],
+["고정 물리 광인 (낮은 혈질용)",["R2|18|물리 21% + 물리 18.2|MM|s9k4dqvz|일1 (램프 근처)","W|18|물리 21% + 물리 18.2|MM|u9mb74p2|로1 (램프에서 두 번째 방)"]],
+["Fool's 물리 광인 (PvE)",["R2|18|물리 21% + 풀HP 시 공격력 12%|MM|s9k4dqvz|일1 (램프 근처)","W|18|물리 21% + 풀HP 시 공격력 12%|MM|u9mb74p2|로1 (램프에서 두 번째 방)"]]]],
+["무기별 세팅 (Weapon-specific)",[
+["잃어버린 토니트루스 (L1 버프) — 모두강화의",["R|20|공격력 19.5% + 번개 15|RM|593da6eg|일3","T|20|공격력 21.5% + 번개 15|AM|fivg3b73|이3","W|20|공격력 21.5% + 번개 15|AM|bau36yx7|로3","R|17|공격력 19.3% + 물리 8.1 (쉬운 파밍)|LC|ca8pxpgb|일2 (램프 근처)","R|17|공격력 19.3% + 번개 13.5 (쉬운 파밍)|LC|gmcxyue6|일2 (램프 근처)"]],
+["이질적인 로가리우스의 바퀴 (변형 대시 R1 다단히트)",["R2|17|타격 10.9% / 물리 9.1% + 신비 67.5|BS|4vr8f9b9|일1 (다리 밑 동굴, 몹)","T|19|타격 11.7% / 물리 9.8% + 신비 72.5|BS|fgetu6gy|이1 (보스)"]],
+["이질적인 로가리우스의 바퀴 (모두강화의 대안, 희귀 드롭)",["R2|17|공격력 7.9% + 신비 67.5|BS|jbrfi85f / 7ebbmq4z|일1 (다리 밑 동굴, 몹)","T|19|공격력 8.5% + 신비 72.5|BS|a2hjx8xe|이1 (보스)"]],
+["잃어버린 로가리우스의 바퀴 · 월광검 · 아미그달라종의 팔 + 모두강화의 자비의 칼날 (무브셋 전반)",["R|20|공격력 19.5% + 물리 15|RM|v5v5fpsd|일3","T|20|공격력 21.5% + 물리 15|AM|u7kwnzsa|이3","W|20|공격력 21.5% + 물리 15|AM|yqmb73dk|로3","R|17|공격력 19.3% + 물리 8.1 (쉬운 파밍)|LC|ca8pxpgb|일2 (램프 근처)"]],
+["위와 같은 무기 — 신비 대안",["R|17|공격력 19.3% + 신비 13.5|LC|dsmpiyfb|일2 (램프 근처)","T|20|공격력 21.5% + 신비 15|AM|zhix9ex3|이3","W|20|공격력 21.5% + 신비 15|AM|6bua3e6v|로3"]],
+["잃어버린 폭발 망치 (L2 버프) — 모두강화의",["R|20|공격력 19.5% + 화염 15|RM|593da6eg|일3","T|20|공격력 21.5% + 화염 15|AM|fivg3b73|이3","W|20|공격력 21.5% + 화염 15|AM|bau36yx7|로3","R|17|공격력 19.3% + 물리 8.1 (쉬운 파밍)|LC|ca8pxpgb|일2 (램프 근처)","R|17|공격력 19.3% + 화염 13.5 (쉬운 파밍)|LC|gmcxyue6|일2 (램프 근처)"]]]]
+];
+const W="Amygdalan Arm|아미그달라종의 팔|160|0|80|0.9|0.25|0|0.63;Beast Claw|야수의 발톱|150|0|0|0.6|0.35|0|0.52;Beast Cutter|야수절단기|184|0|0|0.6|0.3|0|0.49;Beasthunter Saif|야수사냥꾼의 사이프|180|0|0|0.3|0.7|0|0.55;Blade of Mercy|자비의 칼날|120|0|60|0|1.1|0|0.7;Bloodletter|출혈검|180|180|0|1|0|1.1|0.55;Boom Hammer|폭발 망치|180|0|화염 120|0.9|0.25|0|0.63;Burial Blade|장송의 칼날|160|0|60|0.3|0.75|0|0.7;Chikage|치카게|184|184|0|0.25|0.65|1.1|0.49;Church Pick|교단의 피크|176|0|0|0.4|0.7|0|0.6;Holy Moonlight Sword|월광검|180|0|100|0.8|0.6|0|1.0;Hunter Axe|야수 사냥의 도끼|196|0|0|0.65|0.35|0|0.55;Kirkhammer|교단의 돌망치|210|0|0|1.0|0.29|0|0.7;Kos Parasite|코스의 기생충|0|0|60|0|0|0|1.6;Logarius' Wheel|로가리우스의 바퀴|200|0|50|1.1|0|0|0.6;Ludwig's Holy Blade|루드비히의 성검|200|0|0|0.8|0.8|0|0.88;Rakuyo|라쿠요|164|0|0|0|1.0|0|0.55;Reiterpallasch|레이테르팔라슈|150|150|0|0.2|1.0|0.4|0.66;Rifle Spear|총창|170|170|0|0.3|0.7|0.65|0.55;Saw Cleaver|톱 단창|180|0|0|0.6|0.4|0|0.55;Saw Spear|톱 창|170|0|0|0.5|0.64|0|0.62;Simon's Bowblade|시몬의 궁검|160|160|0|0|1.1|1.1|0.6;Stake Driver|말뚝박이|170|0|0|0.6|0.55|0|0.63;Threaded Cane|칼날 지팡이|156|0|0|0.29|0.9|0|0.65;Tonitrus|토니트루스|160|0|번개 80|0.65|0.25|0|0.49;Whirligig Saw|무한궤도 톱|190|0|0|1.1|0.3|0|0.77;Cannon|대포|0|600|0|0|0|0.4|0;Church Cannon|교단의 대포|0|480|0|0|0|0.5|0;Evelyn|에블린|0|140|0|0|0|1.35|0;Fist of Gratia|그라티아의 주먹|130|0|0|1.0|0|0|0;Gatling Gun|개틀링 건|0|180|0|0|0|0.4|0;Hunter Blunderbuss|야수 사냥의 산탄총|0|45|0|0|0|1.0|0;Hunter Pistol|야수 사냥의 단총|0|160|0|0|0|0.85|0;Ludwig's Rifle|루트비히의 장총|0|55|0|0|0|0.5|0;Piercing Rifle|관통 소총|0|160|0|0|0|1.0|0;Repeating Pistol|교단의 연발총|0|200|0|0|0|0.8|0;Rosmarinus|로즈마리누스|0|0|80|0|0|0|1.25";
+const ALL=S.map(x=>[...x,"n"]).concat(E.map(x=>[...x,"e"]));
+const NM=W.split(";").map(r=>r.split("|").slice(0,2));
+const EDN="편집 던전 = 세이브 편집으로 혈정석 효과 풀을 바꾼 던전이야. 보스 처치 후 '인벤토리/보관함 최대로 획득 불가' 메시지가 떠도 무해해. ※ 원문이 '모두강화의 Fool's 보조 세팅'에서 끊겨서, 그 뒤 항목(코스의 기생충·속성·차지·야수/권속·독·HP 회복·빈사·혈질)은 편집 던전 데이터가 없어.";
+const TIP="보조옵션 (효과 최대 3개 중 2·3번째)\n• 고정 공격력 추가: 물리/화염/번개/신비/혈질\n• 느린 독 / 맹독\n• 무기 내구도 증가\n• 풀HP 시 물리 상승\n• 빈사 시 물리 상승\n• 차지 공격력 증가\n• 스태미나 소모 감소\n• HP 지속 회복\n• 리게인 증가\n※ 조합 제한 있음";
+const tipify=s=>s.replace(/보조옵션|보조(?= 15)/g,m=>`<span class="tip" data-tip="${TIP}">${m}</span>`);
+const tp=document.createElement("div");tp.id="tp";document.body.appendChild(tp);
+function showTip(el){tp.textContent=el.dataset.tip;tp.style.display="block";const r=el.getBoundingClientRect();tp.style.left=Math.max(4,Math.min(r.left,innerWidth-258))+"px";tp.style.top=(r.bottom+4)+"px"}
+out.addEventListener("mouseover",e=>{if(e.target.classList.contains("tip"))showTip(e.target)});
+out.addEventListener("mouseout",e=>{if(e.target.classList.contains("tip"))tp.style.display="none"});
+document.addEventListener("click",e=>{if(e.target.classList.contains("tip"))showTip(e.target);else tp.style.display="none"});
+const ch=$("chips");ch.innerHTML=['<button data-i="">전체</button>'].concat([...new Set(ALL.map(x=>x[0]))].map(n=>`<button data-i="${n}">${n}</button>`)).join("");ch.firstChild.classList.add("on");
+ch.addEventListener("click",e=>{const i=e.target.dataset.i;if(i===undefined)return;cat=i;[...ch.children].forEach(b=>b.classList.toggle("on",b.dataset.i===i));render()});
+["q","sh","mr","dm"].forEach(i=>$(i).addEventListener("input",render));render();
+
+function rw(){const q=$("wq").value.trim().toLowerCase();$("wb").innerHTML=W.split(";").map(r=>r.split("|")).filter(c=>(c[0]+c[1]).toLowerCase().includes(q)).map(c=>`<tr><td>${c[1]} <span class="n">${c[0]}</span></td>${c.slice(2).map(x=>`<td>${x}</td>`).join("")}</tr>`).join("")}
+$("wq").addEventListener("input",rw);rw();
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.toggle("on",x===b));$("t1").hidden=b.dataset.t!=="1";$("t2").hidden=b.dataset.t!=="2";scrollTo(0,0)}));
+</script></body></html>
