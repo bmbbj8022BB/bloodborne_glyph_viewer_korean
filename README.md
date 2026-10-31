@@ -1,1 +1,2 @@
 # bloodborne_glyph_viewer_korean
+
